@@ -8,6 +8,7 @@
     - [Install Manager](#install-manager)
     - [Automatic Rojo Syncing](#automatic-rojo-syncing)
 - [Usage Guide](#usage-guide)
+  - [Installing RODA](#installing-roda)
   - [After installing RODA](#after-installing-roda)
   - [1. Creating a new project](#1-creating-a-new-project)
   - [2. Loading an existing project](#2-loading-an-existing-project)
@@ -61,6 +62,8 @@ Note: No builds are currently released but will be dropped in the next few days
 - RODA provides automatic Rojo syncing to keep your projects in sync with your Roblox workspace. Any changes made within RODA are seamlessly synchronized with your Roblox projects, ensuring consistency and efficiency in your development workflow.
 
 # Usage Guide
+## Installing RODA
+[You can install RODA for windows here](https://github.com/zacharie410/RODA--Roblox-Developer-Assistant/releases)
 ## After installing RODA
 Make sure you install aftman and the ROJO CLI as they are dependencies for many of the application features
 
