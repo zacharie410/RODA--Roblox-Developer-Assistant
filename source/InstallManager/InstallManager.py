@@ -52,10 +52,8 @@ class InstallManager(customtkinter.CTkFrame):
     def check_file_exists(self, directory, filename):
         filepath = os.path.join(directory, filename)
         if os.path.exists(filepath):
-            print(f"The file '{filename}' exists in the directory.")
             return True
         else:
-            print(f"The file '{filename}' does not exist in the directory.")
             return False
 
     def download_file(self, url, directory):
@@ -68,17 +66,13 @@ class InstallManager(customtkinter.CTkFrame):
         # Download the file using wget
         try:
             wget.download(url, out=filepath)
-            print(f"File downloaded successfully: {filepath}")
         except Exception as e:
-            print(f"Failed to download the file: {str(e)}")
+            return
 
     def delete_file_if_exists(self, directory, filename):
         filepath = os.path.join(directory, filename)
         if os.path.exists(filepath):
             os.remove(filepath)
-            print(f"The file '{filename}' has been deleted.")
-        else:
-            print(f"The file '{filename}' does not exist in the directory.")
 
     def install_rojo_plugin(self):
         url = "https://github.com/rojo-rbx/rojo/releases/latest/download/Rojo.rbxm"
@@ -117,7 +111,6 @@ class InstallManager(customtkinter.CTkFrame):
         installDir = os.path.join(os.environ["TEMP"], "aftman")
         # Check if aftman is already installed
         if os.path.exists(os.path.join(installDir, "aftman.exe")):
-            print("Removing previous temporary files")
             shutil.rmtree(installDir)
 
         urllib.request.urlretrieve(downloadUrl, zipName)
@@ -125,15 +118,10 @@ class InstallManager(customtkinter.CTkFrame):
             zip_ref.extractall(installDir)
 
         # Elevate the aftman installer
-        subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=True)
+        subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         #update list
         
         self.update_installations_list()
-
-    def show_tools(self):
-        # Logic to display the Tools page
-        # Replace this with your implementation
-        print("Showing Tools page")
 
     def is_installed(self, installToFind):
         try:
@@ -151,7 +139,12 @@ class InstallManager(customtkinter.CTkFrame):
                 else:
                     return False
             else:
-                out = str(subprocess.check_output(["aftman", "-V"])) + str(subprocess.check_output(["aftman", "list"]))
+                out = ""
+                if installToFind == "aftman":
+                    out = str(subprocess.check_output(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW))
+                else:
+                    out = str(subprocess.check_output(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW))
+
                 if ((out).find(installToFind)!=-1):
                     return True
                 else:
@@ -170,7 +163,6 @@ class InstallManager(customtkinter.CTkFrame):
         versionName = item["version"]
         # Logic to perform the installation
         # Replace this with your implementation
-        print(f"Installing tool: {versionName}")
         if versionName == "rojo/plugin":
             self.install_rojo_plugin()
         elif versionName == "rojo/converter":
@@ -178,8 +170,8 @@ class InstallManager(customtkinter.CTkFrame):
         elif versionName == "aftman":
             self.install_aftman()
         else:
-            subprocess.run(["aftman", "add", "--global", versionName])
-            subprocess.run(["aftman", "install"])
+            subprocess.run(["aftman", "add", "--global", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run(["aftman", "install"], creationflags=subprocess.CREATE_NO_WINDOW)
 
         self.update_installations_list()
         self.app.loading_end(self)
@@ -190,7 +182,6 @@ class InstallManager(customtkinter.CTkFrame):
         v = item["version"]
         # Logic to perform the uninstallation
         # Replace this with your implementation
-        print(f"Uninstalling tool: {v}")
         if v=="rojo/plugin":
             directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")  # Use the appropriate path for the local directory
             self.delete_file_if_exists(directory, "Rojo.rbxm")
