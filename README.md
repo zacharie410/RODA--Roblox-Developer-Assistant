@@ -239,4 +239,4 @@ Please note that this documentation assumes you have an instance of the `Project
 Let me know if you need any further clarification or have additional questions!
 
 ## Acknowledgements
-This app was made possible using the Custom Tkinter library by Tom Schimansky: https://github.com/TomSchimansky/CustomTkinter
+This app was made possible using the Custom Tkinter library by Tom Schimansky: https://github.com/TomSchimansky/CustomTkinter (MIT License)
