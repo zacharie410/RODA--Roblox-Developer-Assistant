@@ -12,7 +12,6 @@ from source import (
 )
 
 from source import (
-    EmbeddedCommandPrompt,
     ProjectAPI,
     ProjectCreatorHandler,
     ViewProjectsFrame,
@@ -63,9 +62,7 @@ class App(CTk):
         self.container_frame = CTkFrame(self, fg_color="transparent")
         self.container_frame.place(relwidth=0.75-paddingx, relx=offsetx + 0.25, relheight=1-paddingy, rely=offsety)
 
-        self.embedded_command = EmbeddedCommandPrompt(self)
 
-        self.embedded_command.place_forget()
         # create subframes
         self.loading_frame = CTkFrame(self.container_frame)
         self.loading_frame.place_forget()
@@ -162,10 +159,10 @@ class App(CTk):
         self.destroy()
     
     def hide_cmd(self):
-        self.embedded_command.place_forget()
+        return
 
     def show_cmd(self):
-        self.embedded_command.place(relwidth=0.7, relheight=0.4, relx=0.275, rely=0.55)
+        return #fix later
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         set_appearance_mode(new_appearance_mode)

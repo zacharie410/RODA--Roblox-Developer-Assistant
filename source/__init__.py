@@ -14,7 +14,6 @@ from customtkinter import (
     set_widget_scaling
 )
 
-from .EmbeddedCommandPrompt import EmbeddedCommandPrompt
 from .ProjectAPI import ProjectAPI
 from .ProjectCreatorHandler import ProjectCreatorHandler
 from .ViewProjectsFrame import ViewProjectsFrame
