@@ -7,6 +7,12 @@
     - [Project Creation](#project-creation)
     - [Install Manager](#install-manager)
     - [Automatic Rojo Syncing](#automatic-rojo-syncing)
+- [Usage Guide](#usage-guide)
+  - [After installing RODA](#after-installing-roda)
+  - [1. Creating a new project](#1-creating-a-new-project)
+  - [2. Loading an existing project](#2-loading-an-existing-project)
+  - [3. Importing an existing Roblox Place](#3-importing-an-existing-roblox-place)
+  - [4. Syncing to studio](#4-syncing-to-studio)
 - [Developer Documentation](#developer-documentation)
     - [This section is for developer use only!](#this-section-is-for-developer-use-only)
   - [Contributing](#contributing)
@@ -53,6 +59,41 @@ Note: No builds are currently released but will be dropped in the next few days
 ![Synced](/screenshots/synced.png)
 
 - RODA provides automatic Rojo syncing to keep your projects in sync with your Roblox workspace. Any changes made within RODA are seamlessly synchronized with your Roblox projects, ensuring consistency and efficiency in your development workflow.
+
+# Usage Guide
+## After installing RODA
+Make sure you install aftman and the ROJO CLI as they are dependencies for many of the application features
+
+## 1. Creating a new project
+   To create a new project, navigate to the Create Project menu.
+   - Select New Project from the options
+   - Configure the parameters to your liking
+   - Press Create Project
+   - [Syncing to studio](#4-syncing-to-studio)
+
+## 2. Loading an existing project
+   To load an existing project, navigate to the Create Project menu.
+ - Select Load Project
+ - For the path, select an existing Rojo File structure project directoy.
+ - Press Create Project
+ - [Syncing to studio](#4-syncing-to-studio)
+
+## 3. Importing an existing Roblox Place
+   To import an existing roblox place, press Import RBXLX on the left sidebar
+   - The file you convert must be an RBXLX, you can generate this by selecting RBXLX as the SaveAs option in Roblox Studio when saving
+   - Select your RBXLX file, then select the directory where you wish to build the project folder
+   - Once this is complete, follow the steps from [Loading an existing project](#2-loading-an-existing-project)
+   - [Syncing to studio](#4-syncing-to-studio)
+
+## 4. Syncing to studio
+   After you have created or loaded a project, follow these steps to sync with roblox.
+   - In the project viewer, press the Open File explorer to have access to project directory
+   - Once inside the project directory, open with VS Code to begin editing
+   - Open the roblox build file in Roblox Studio
+   - Navigate to Roblox Studio Plugins bar
+   - Click on Rojo
+   - When RODA tells you the syncing service is ready, press connect to server in roblox studio
+   - You are ready to edit your new project!
 
 # Developer Documentation
 ### This section is for developer use only!
