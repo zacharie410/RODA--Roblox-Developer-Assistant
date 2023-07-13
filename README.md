@@ -1,5 +1,19 @@
 # RODA: Roblox Developer Assistant
 
+- [RODA: Roblox Developer Assistant](#roda-roblox-developer-assistant)
+  - [Features](#features)
+  - [Screenshots](#screenshots)
+    - [Project Management](#project-management)
+    - [Project Creation](#project-creation)
+    - [Install Manager](#install-manager)
+    - [Automatic Rojo Syncing](#automatic-rojo-syncing)
+- [Developer Documentation](#developer-documentation)
+    - [This section is for developer use only!](#this-section-is-for-developer-use-only)
+  - [Contributing](#contributing)
+  - [Build Instructions](#build-instructions)
+  - [ProjectAPI Documentation](#projectapi-documentation)
+  - [Acknowledgements](#acknowledgements)
+
 RODA is a Python GUI application designed to simplify the management of multiple Roblox projects. It provides a user-friendly interface for managing and organizing your Roblox projects efficiently.
 
 Note: No builds are currently released but will be dropped in the next few days
@@ -40,5 +54,145 @@ Note: No builds are currently released but will be dropped in the next few days
 
 - RODA provides automatic Rojo syncing to keep your projects in sync with your Roblox workspace. Any changes made within RODA are seamlessly synchronized with your Roblox projects, ensuring consistency and efficiency in your development workflow.
 
+# Developer Documentation
+### This section is for developer use only!
+
 ## Contributing
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue or submit a pull request.
+
+## Build Instructions
+To build the project with your own changes follow these steps:
+1. Ensure pyinstaller is installed `pip install pyinstaller`
+2. Navigate to root project folder in a terminal window
+3. In the same window, run: `python -m PyInstaller -wF RodaApp.py --collect-all customtkinter -w`
+4. Wait 1-3 minutes and your project be built
+5. Currently you must copy the images folder into your dist folder after building
+
+## ProjectAPI Documentation
+
+The ProjectAPI module provides a ProjectAPI class for managing projects. You can instantiate the class and call its methods to perform various operations on projects.
+
+**Data Structure:**
+
+The data structure for a project includes the following fields:
+
+- `id` (string): Unique identifier for the project.
+- `name` (string): Name of the project.
+- `description` (string): Description of the project.
+- `file_path` (string): File path associated with the project.
+
+**Class: ProjectAPI**
+
+This class provides the following methods:
+
+1. **`__init__(self, json_file)`**
+
+   Description: Initializes the ProjectAPI instance.
+
+   Parameters:
+   - `json_file` (string): Path to the JSON file storing project data.
+
+   Example Usage:
+   ```python
+   project_api = ProjectAPI("projects.json")
+   ```
+
+2. **`get_projects(self)`**
+
+   Description: Retrieves all projects.
+
+   Returns:
+   - `projects` (list): List of project dictionaries.
+
+   Example Usage:
+   ```python
+   projects = project_api.get_projects()
+   ```
+
+3. **`create_project(self, project)`**
+
+   Description: Creates a new project.
+
+   Parameters:
+   - `project` (dict): Dictionary representing the project with fields `name`, `description`, and `file_path`.
+
+   Example Usage:
+   ```python
+   new_project = {
+       "name": "New Project",
+       "description": "This is a new project",
+       "file_path": "/path/to/new_project"
+   }
+   project_api.create_project(new_project)
+   ```
+
+4. **`get_project(self, project_id)`**
+
+   Description: Retrieves a specific project by its ID.
+
+   Parameters:
+   - `project_id` (string): ID of the project to retrieve.
+
+   Returns:
+   - `project` (dict): Dictionary representing the project with fields `id`, `name`, `description`, and `file_path`.
+
+   Example Usage:
+   ```python
+   project = project_api.get_project("2")
+   ```
+
+5. **`get_project_by_name(self, project_name)`**
+
+   Description: Retrieves a specific project by its name.
+
+   Parameters:
+   - `project_name` (string): Name of the project to retrieve.
+
+   Returns:
+   - `project` (dict): Dictionary representing the project with fields `id`, `name`, `description`, and `file_path`.
+
+   Example Usage:
+   ```python
+   project = project_api.get_project_by_name("New Project")
+   ```
+
+6. **`update_project(self, project_id, project_data)`**
+
+   Description: Updates a specific project by its ID.
+
+   Parameters:
+   - `project_id` (string): ID of the project to update.
+   - `project_data` (dict): Dictionary containing the updated project fields.
+
+   Returns:
+   - `project` (dict): Dictionary representing the updated project with fields `id`, `name`, `description`, and `file_path`.
+
+   Example Usage:
+   ```python
+   updated_project_data = {
+       "description": "Updated project 2"
+   }
+   updated_project = project_api.update_project("2", updated_project_data)
+   ```
+
+7. **`delete_project(self, project_id)`**
+
+   Description: Deletes a specific project by its ID.
+
+   Parameters:
+   - `project_id` (string): ID of the project to delete.
+
+   Returns:
+   - `success` (bool): `True` if the project was successfully deleted, `False` otherwise.
+
+   Example Usage:
+   ```python
+   success = project_api.delete_project("1")
+   ```
+
+Please note that this documentation assumes you have an instance of the `ProjectAPI` class initialized (`project_api` in the examples). You can call the methods on that instance accordingly to interact with the project data.
+
+Let me know if you need any further clarification or have additional questions!
+
+## Acknowledgements
+This app was made possible using the Custom Tkinter library by Tom Schimansky: https://github.com/TomSchimansky/CustomTkinter
