@@ -1,0 +1,28 @@
+# Compiled Python files
+*.pyc
+*.pyo
+__pycache__/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.penv/
+
+# IDE / Editor specific files
+.vscode/
+.idea/
+*.sublime-workspace
+*.swp
+*~
+
+# Miscellaneous
+*.log
+*.bak
+*.tmp
+.DS_Store
