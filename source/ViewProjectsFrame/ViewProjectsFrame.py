@@ -80,7 +80,7 @@ class ViewProjectsFrame(ct.CTkFrame):
 
         self.running=threading.Event()
         self.running.set()
-        self.sync_thread = threading.Thread(target=self.update_sync)
+        self.sync_thread = threading.Timer(5, self.update_sync)
         self.sync_thread.start()
 
     def edit_description(self):
@@ -154,15 +154,16 @@ class ViewProjectsFrame(ct.CTkFrame):
             except Exception as e:
                 if self.running.is_set():
                     self.default_sync_status()
+                    time.sleep(1)
 
 
     def run_server(self):
-        subprocess.run("rojo serve", cwd=self.current_project["file_path"], shell=True)
+        subprocess.run("rojo serve", cwd=self.current_project["file_path"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
     def launch_rojo(self):
         self.app.kill_rojo_processes()
 
-        self.app.server_thread = threading.Thread(target=self.run_server, args=())
+        self.app.server_thread = threading.Timer(1, self.run_server)
         self.app.server_thread.start()
        
 
