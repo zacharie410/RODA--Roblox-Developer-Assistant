@@ -23,7 +23,7 @@
 
 RODA is a Python GUI application designed to simplify the management of multiple Roblox projects. It provides a user-friendly interface for managing and organizing your Roblox projects efficiently.
 
-Note: No builds are currently released but will be dropped in the next few days
+[You can install RODA for windows here](https://github.com/zacharie410/RODA--Roblox-Developer-Assistant/releases)
 
 ## Features
 
