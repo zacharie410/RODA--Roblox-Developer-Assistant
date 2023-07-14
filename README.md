@@ -108,7 +108,7 @@ Contributions are welcome! If you have any suggestions, bug reports, or feature 
 To build the project with your own changes follow these steps:
 1. Ensure pyinstaller is installed `pip install pyinstaller`
 2. Navigate to root project folder in a terminal window
-3. In the same window, run: `python -m PyInstaller -wF RodaApp.py --collect-all customtkinter -w`
+3. In the same window, run: `python -m PyInstaller -wF --add-data "images;images" RodaApp.py --collect-all customtkinter -w`
 4. Wait 1-3 minutes and your project be built
 5. Currently you must copy the images folder into your dist folder after building
 
