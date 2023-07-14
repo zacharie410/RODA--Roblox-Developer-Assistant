@@ -35,6 +35,8 @@ class App(CTk):
         self.check_folder(directory)
         self.check_folder(os.path.join(directory, "Projects"))
         self.check_folder(os.path.join(directory, "Utility"))
+        self.check_folder(os.path.join(directory, "Images"))
+
         self.api = ProjectAPI(os.path.join(directory, "projects.json"))
         self.server_thread = False
 
