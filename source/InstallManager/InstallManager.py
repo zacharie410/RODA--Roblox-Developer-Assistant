@@ -141,10 +141,11 @@ class InstallManager(customtkinter.CTkFrame):
             else:
                 out = ""
                 if installToFind == "aftman":
-                    out = str(subprocess.check_output(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW))
+                    result = subprocess.run(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
+                    out = str(result.stdout)
                 else:
-                    out = str(subprocess.check_output(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW))
-
+                    result = subprocess.run(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
+                    out = str(result.stdout)
                 if ((out).find(installToFind)!=-1):
                     return True
                 else:
