@@ -9,6 +9,8 @@ import threading
 import time
 import tkinter.simpledialog as tkSimpleDialog
 import tkinter.messagebox as messagebox
+import wget
+from pathlib import Path
 
 class ViewProjectsFrame(ct.CTkFrame):
     def __init__(self, parent, project_api, create_project, app):
@@ -16,6 +18,7 @@ class ViewProjectsFrame(ct.CTkFrame):
         self.project_api = project_api
         self.create_project = create_project
         self.app = app
+        self.load_assets()
         # Create two container frames
         self.projects_container = ct.CTkFrame(self)
         self.project_details_container = ct.CTkFrame(self)
@@ -79,6 +82,27 @@ class ViewProjectsFrame(ct.CTkFrame):
         self.running.set()
         self.sync_thread = threading.Timer(5, self.update_sync)
         self.sync_thread.start()
+    
+    def load_assets(self):
+        #Load images
+        user_home = str(Path.home())
+        directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Images").replace('\\', '/')
+        self.ficon = directory + "/folder_icon.png"
+        self.nicon = directory + "/new_folder_icon.png"
+        
+        if not os.path.exists(self.ficon):
+            self.download_file("https://github.com/zacharie410/RODA--Roblox-Developer-Assistant/blob/main/images/folder_icon.png?raw=true", self.ficon)
+        
+        if not os.path.exists(self.nicon):
+            self.download_file("https://github.com/zacharie410/RODA--Roblox-Developer-Assistant/blob/main/images/new_folder_icon.png?raw=true", self.nicon)
+
+
+    def download_file(self, url, directory):
+        # Download the file using wget
+        try:
+            wget.download(url, out=directory)
+        except Exception as e:
+            return
 
     def edit_description(self):
        t = tkSimpleDialog.askstring("Edit", "New description")
@@ -188,8 +212,8 @@ class ViewProjectsFrame(ct.CTkFrame):
             return x, y
         
 
-        ficon = ct.CTkImage(light_image=Image.open("images/folder_icon.png"), dark_image=Image.open("images/folder_icon.png"), size=(32, 32))
-        nficon = ct.CTkImage(light_image=Image.open("images/new_folder_icon.png"), dark_image=Image.open("images/new_folder_icon.png"), size=(32, 32))
+        ficon = ct.CTkImage(light_image=Image.open(self.ficon), dark_image=Image.open(self.ficon), size=(32, 32))
+        nficon = ct.CTkImage(light_image=Image.open(self.nicon), dark_image=Image.open(self.nicon), size=(32, 32))
 
         num = 0
         for id, project in enumerate(projects):
