@@ -1,5 +1,4 @@
 import subprocess
-import shutil
 import os
 import customtkinter as ct
 from PIL import Image
@@ -10,8 +9,6 @@ import threading
 import time
 import tkinter.simpledialog as tkSimpleDialog
 import tkinter.messagebox as messagebox
-
-from pathlib import Path
 
 class ViewProjectsFrame(ct.CTkFrame):
     def __init__(self, parent, project_api, create_project, app):
