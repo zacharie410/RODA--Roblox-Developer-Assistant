@@ -30,6 +30,7 @@ class InstallManager(customtkinter.CTkFrame):
             {"name": "Rojo Plugin", "versionName": "rojo/plugin", "dependency": "rojo-rbx/rojo", "var": customtkinter.BooleanVar()},
             {"name": "RBXLX to Rojo", "versionName": "rojo/converter", "dependency": "", "var": customtkinter.BooleanVar()},
         ]
+        self.install_buttons = {}
         self.update_installations_list()  # Initial update
 
 
@@ -118,8 +119,12 @@ class InstallManager(customtkinter.CTkFrame):
             zip_ref.extractall(installDir)
 
         # Elevate the aftman installer
-        subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+        subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
         #update list
+
+        cleanup = os.path.join(os.getcwd(), zipName)
+        if os.path.exists(cleanup):
+            os.remove(cleanup)
         
         self.update_installations_list()
 
@@ -139,25 +144,33 @@ class InstallManager(customtkinter.CTkFrame):
                 else:
                     return False
             else:
-                command = "aftman"
-                aftman_path = shutil.which(command)
+                user_home = str(Path.home())
+                directory = os.path.join(os.path.join(user_home, ".aftman"), "bin")
+                if os.path.exists(directory):
+                    out = ""
+                    if installToFind == "aftman" :
+                        result = subprocess.run(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
+                        out = str(result.stdout)
+                    else:
+                        result = subprocess.run(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
+                        out = str(result.stdout)
 
-                out = ""
-                if installToFind == "aftman" and aftman_path is not None:
-                    result = subprocess.run(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
-                    out = str(result.stdout)
-                elif aftman_path is not None:
-                    result = subprocess.run(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
-                    out = str(result.stdout)
+                    if ((out).find(installToFind)!=-1):
+                        return True
+                    else:
+                        return False
                 else:
                     return False
 
-                if ((out).find(installToFind)!=-1):
-                    return True
-                else:
-                    return False
+
         except subprocess.CalledProcessError:
             return False
+        except FileNotFoundError:
+            # Handle the case when 'aftman' executable is not found
+            print("Error: 'aftman' not found")
+        except Exception as e:
+            # Handle any other unexpected exceptions
+            print("Unexpected error:", e)
 
     def install_tool(self, item, thread, previous_thread):
         if previous_thread != False:
@@ -177,6 +190,7 @@ class InstallManager(customtkinter.CTkFrame):
         elif versionName == "aftman":
             self.install_aftman()
         else:
+            subprocess.run(["aftman", "trust", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
             subprocess.run(["aftman", "add", "--global", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
             subprocess.run(["aftman", "install"], creationflags=subprocess.CREATE_NO_WINDOW)
 
@@ -197,6 +211,12 @@ class InstallManager(customtkinter.CTkFrame):
             user_home = str(Path.home())
             directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
             self.delete_file_if_exists(directory, "rbxlx-to-rojo.exe")
+        elif v=="aftman":
+            user_home = str(Path.home())
+            directory = os.path.join(user_home, ".aftman")
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
+                
         self.deselect_all_tools()
 
     def install_tools(self):
@@ -227,17 +247,12 @@ class InstallManager(customtkinter.CTkFrame):
         for item in self.selected_checkboxes:
             item["checkbox_var"].set(False)
     def update_installations_list(self):
-        # Clear the listbox
-        for child in self.installations_listbox.winfo_children():
-            child.destroy()
-
-
-        self.selected_checkboxes.clear()
         # Update the listbox based on the installation status
         for item in self.installations_list:
             item_text = item["name"]
             version = item["versionName"]
             installed = self.is_installed(version)
+            checkbox_var = item["var"]
             if installed:
                 item_text += " (Installed)"
             else:
@@ -246,25 +261,28 @@ class InstallManager(customtkinter.CTkFrame):
                 if item2["versionName"] == item["dependency"]:
                     item_text = item_text + " *Requires " + item2["name"] + "*"
                     break
-            # Create a frame to hold the checkbox and label
-            frame = customtkinter.CTkFrame(self.installations_listbox)
-            frame.pack(fill="x", padx=5, pady=5)
-
-            checkbox_var = item["var"]
 
             s=tk.NORMAL
             if item["dependency"] != "" and not self.is_installed(item["dependency"]):
                 s=tk.DISABLED
                 installed = False #Chaneg gui color
-            # Create a Checkbutton with the custom style
-            checkbox = customtkinter.CTkCheckBox(frame, text=item_text, variable=checkbox_var, state=s)
-            checkbox.pack(side="left")
+
+            frame = None
+            checkbox = None
+
+            if version in self.install_buttons:
+                self.install_buttons[version][1].configure(text=item_text)
+            else:
+                self.install_buttons[version] = [customtkinter.CTkFrame(self.installations_listbox)]
+                self.install_buttons[version].append(customtkinter.CTkCheckBox(self.install_buttons[version][0], text=item_text, variable=checkbox_var, state=s))
+                self.install_buttons[version][0].pack(fill="x", padx=5, pady=5)
+                self.install_buttons[version][1].pack(side="left")
+                
+                # Add the checkbox variable to the selected_checkboxes array
+                self.selected_checkboxes.append({"checkbox_var": checkbox_var, "version": version, "name": item["name"]})
+
 
             if installed:
-                
-                checkbox.configure(text_color="#90EE90")
+                self.install_buttons[version][1].configure(text_color="#90EE90")
             else:
-                checkbox.configure(text_color="#FFA500")
-
-            # Add the checkbox variable to the selected_checkboxes array
-            self.selected_checkboxes.append({"checkbox_var": checkbox_var, "version": version, "name": item["name"]})
+                self.install_buttons[version][1].configure(text_color="#FFA500")
