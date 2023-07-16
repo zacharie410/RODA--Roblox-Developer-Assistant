@@ -1,6 +1,5 @@
 
 import customtkinter as ct
-import tempfile
 from tkinter import filedialog
 import os
 from pathlib import Path
