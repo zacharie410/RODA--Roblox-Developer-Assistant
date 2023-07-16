@@ -24,14 +24,20 @@ import sys
 import os
 from pathlib import Path
 import subprocess
+
 set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
+VERSION = "1.0.4"
 
 class App(CTk):
     def __init__(self):
         super().__init__()
         user_home = str(Path.home())
         directory = os.path.join(user_home, "RODAssistant")
+
+        self.version = VERSION
+
         self.check_folder(directory)
         self.check_folder(os.path.join(directory, "Projects"))
         self.check_folder(os.path.join(directory, "Utility"))
@@ -41,7 +47,7 @@ class App(CTk):
         self.server_thread = False
 
         # configure window
-        self.title("RODA: Roblox Developer Assistant")
+        self.title("RODA: Roblox Developer Assistant v" + VERSION)
 
                 # Set the desired aspect ratio
         self.aspect_ratio = 16 / 9  # For example, 16:9
@@ -187,9 +193,10 @@ class App(CTk):
     def on_closing(self):
         self.kill_rojo_processes()
         self.projects_frame.stop_thread()
-        self.destroy()
         self.kill_all_executables()
         self.kill_current_file_processes()
+        self.destroy()
+
     
     def hide_cmd(self):
         return

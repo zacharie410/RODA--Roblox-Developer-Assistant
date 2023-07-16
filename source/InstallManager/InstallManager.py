@@ -24,11 +24,11 @@ class InstallManager(customtkinter.CTkFrame):
         self.selected_checkboxes = []
                 # List of recommended installs
         self.installations_list = [
-            {"name": "Aftman Toolchain Manager", "versionName": "aftman", "dependency": "", "var": customtkinter.BooleanVar()},
-            {"name": "Rojo CLI", "versionName": "rojo-rbx/rojo", "dependency": "aftman", "var": customtkinter.BooleanVar()},
-            {"name": "Wally CLI", "versionName": "UpliftGames/wally", "dependency": "aftman", "var": customtkinter.BooleanVar()},
-            {"name": "Rojo Plugin", "versionName": "rojo/plugin", "dependency": "rojo-rbx/rojo", "var": customtkinter.BooleanVar()},
-            {"name": "RBXLX to Rojo", "versionName": "rojo/converter", "dependency": "", "var": customtkinter.BooleanVar()},
+            {"name": "Aftman Toolchain Manager", "versionName": "aftman", "dependency": "", "var": customtkinter.BooleanVar(), "restart": True},
+            {"name": "Rojo CLI", "versionName": "rojo-rbx/rojo", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": False},
+            {"name": "Wally CLI", "versionName": "UpliftGames/wally", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": False},
+            {"name": "Rojo Plugin", "versionName": "rojo/plugin", "dependency": "rojo-rbx/rojo", "var": customtkinter.BooleanVar(), "restart": False},
+            {"name": "RBXLX to Rojo", "versionName": "rojo/converter", "dependency": "", "var": customtkinter.BooleanVar(), "restart": False},
         ]
         self.install_buttons = {}
         self.update_installations_list()  # Initial update
@@ -198,6 +198,11 @@ class InstallManager(customtkinter.CTkFrame):
         self.app.loading_end(self)
         self.installing = False
 
+        if item["restart"] == True:
+            self.app.loading_start("App must restart . . . ")
+            self.app.on_closing()
+            
+
 
     def uninstall_tool(self, item):
         v = item["version"]
@@ -231,8 +236,9 @@ class InstallManager(customtkinter.CTkFrame):
                 thread = threading.Thread(target=self.install_tool, args=(item, thread, previous_thread))
                 thread.start()
                 previous_thread=thread
+                if item["restart"] == True:
+                    break
         self.deselect_all_tools()
-
 
     def uninstall_tools(self):
         for item in self.selected_checkboxes:
@@ -257,6 +263,10 @@ class InstallManager(customtkinter.CTkFrame):
                 item_text += " (Installed)"
             else:
                 item_text += " (Not Installed)"
+                if item["restart"] == True:
+                    item_text += " *App must restart"
+
+
             for item2 in self.installations_list:
                 if item2["versionName"] == item["dependency"]:
                     item_text = item_text + " *Requires " + item2["name"] + "*"
@@ -267,9 +277,6 @@ class InstallManager(customtkinter.CTkFrame):
                 s=tk.DISABLED
                 installed = False #Chaneg gui color
 
-            frame = None
-            checkbox = None
-
             if version in self.install_buttons:
                 self.install_buttons[version][1].configure(text=item_text)
             else:
@@ -279,7 +286,7 @@ class InstallManager(customtkinter.CTkFrame):
                 self.install_buttons[version][1].pack(side="left")
                 
                 # Add the checkbox variable to the selected_checkboxes array
-                self.selected_checkboxes.append({"checkbox_var": checkbox_var, "version": version, "name": item["name"]})
+                self.selected_checkboxes.append({"checkbox_var": checkbox_var, "version": version, "name": item["name"], "restart": item["restart"]})
 
 
             if installed:
