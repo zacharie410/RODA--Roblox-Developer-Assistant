@@ -105,12 +105,39 @@ Make sure you install aftman and the ROJO CLI as they are dependencies for many 
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue or submit a pull request.
 
 ## Build Instructions
-To build the project with your own changes follow these steps:
-1. Ensure pyinstaller is installed `pip install pyinstaller`
-2. Navigate to root project folder in a terminal window
-3. In the same window, run: `python -m PyInstaller -wF RodaApp.py --collect-all customtkinter -w`
-4. Wait 1-3 minutes and your project be built
-5. Currently you must copy the images folder into your dist folder after building
+To build your Roda application using PyInstaller within a virtual environment, you can follow these steps:
+
+1. Activate your virtual environment:
+   - On Windows:
+     ```shell
+     projectName\Scripts\activate
+     ```
+   - On macOS/Linux:
+     ```shell
+     source projectName/bin/activate
+     ```
+
+2. Install PyInstaller if it's not already installed:
+   ```shell
+   pip install pyinstaller
+   ```
+
+3. Navigate to the directory where your main Python script or entry point file is located.
+
+4. Build your application using PyInstaller:
+   ```shell
+   python -m PyInstaller -wF RodaApp.py --collect-all customtkinter -w
+   ```
+
+   PyInstaller will analyze your script, resolve dependencies, and create a standalone executable file in a `dist` directory.
+
+5. After the build process completes, you can find the generated executable file in the `dist` directory.
+
+6. Test the generated executable file to ensure it works as expected.
+
+7. Once you're finished, you can exit the virtual environment by running the `deactivate` command.
+
+Note: It's important to activate your virtual environment before running the PyInstaller command to ensure that the build process uses the packages installed within the virtual environment.
 
 ## ProjectAPI Documentation
 
