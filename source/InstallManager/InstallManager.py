@@ -7,7 +7,7 @@ import urllib.request
 import shutil
 import zipfile
 import subprocess
-import wget
+import sys
 import threading
 import time
 from pathlib import Path
@@ -64,12 +64,12 @@ class InstallManager(customtkinter.CTkFrame):
         # Set the local path for saving the file
         filepath = os.path.join(directory, url.split("/")[-1])
 
-        # Download the file using wget
         try:
-            wget.download(url, out=filepath)
+            # Download the file using urllib
+            urllib.request.urlretrieve(url, filepath)
         except Exception as e:
             return
-
+        
     def delete_file_if_exists(self, directory, filename):
         filepath = os.path.join(directory, filename)
         if os.path.exists(filepath):
@@ -77,16 +77,44 @@ class InstallManager(customtkinter.CTkFrame):
 
     def install_rojo_plugin(self):
         url = "https://github.com/rojo-rbx/rojo/releases/latest/download/Rojo.rbxm"
-        directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")  # Use the appropriate path for the local directory
+        directory = self.get_robolox_plugins_directory()
+
         self.delete_file_if_exists(directory, "Rojo.rbxm")
         self.delete_file_if_exists(directory, "RojoManagedPlugin.rbxm")
         self.download_file(url, directory)
 
+    def get_robolox_plugins_directory(self):
+        system = sys.platform
+        home_directory = os.path.expanduser("~")
+
+        if system == "win32":
+            return os.path.join(home_directory, "AppData", "Local", "Roblox", "Plugins")
+        elif system == "darwin": # MacOS
+            return os.path.join(home_directory, "Library", "Application Support", "Roblox", "Plugins")
+        elif system == "linux":
+            return os.path.join(home_directory, ".config", "Roblox", "Plugins")
+        else:
+            print("Unsupported operating system.")
+            return ""
+
     def install_rbxlx_converter(self):
-        url = "https://github.com/rojo-rbx/rbxlx-to-rojo/releases/latest/download/rbxlx-to-rojo.exe"
+        url = ""
+        directory = ""
+
+        system = sys.platform
         user_home = str(Path.home())
-        directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
-        self.delete_file_if_exists(directory, "rbxlx-to-rojo.exe")
+
+        if system == "win32":
+            url = "https://github.com/rojo-rbx/rbxlx-to-rojo/releases/latest/download/rbxlx-to-rojo.exe"
+            directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
+        elif system == "darwin": #MacOS
+            url = "https://github.com/rojo-rbx/rbxlx-to-rojo/releases/latest/download/rbxlx-to-rojo-macos"
+            directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
+        else: # This tool does not support other OS
+            print("Unsupported operating system.")
+            return
+
+        self.delete_file_if_exists(directory, "rbxlx-to-rojo")
         self.download_file(url, directory)
 
     def install_aftman(self):
@@ -107,79 +135,116 @@ class InstallManager(customtkinter.CTkFrame):
         # Output the latest version
         aftmanVersion = aftmanVersion[1:6]
 
-        zipName = f"aftman-{aftmanVersion}-windows-x86_64.zip"
-        downloadUrl = f"https://github.com/LPGhatguy/aftman/releases/latest/download/{zipName}"
-        installDir = os.path.join(os.environ["TEMP"], "aftman")
-        # Check if aftman is already installed
-        if os.path.exists(os.path.join(installDir, "aftman.exe")):
+        if sys.platform == "win32":
+            zipName = f"aftman-{aftmanVersion}-windows-x86_64.zip"
+            downloadUrl = f"https://github.com/LPGhatguy/aftman/releases/latest/download/{zipName}"
+            installDir = os.path.join(os.environ["TEMP"], "aftman")
+            # Check if aftman is already installed
+            if os.path.exists(os.path.join(installDir, "aftman.exe")):
+                shutil.rmtree(installDir)
+
+            urllib.request.urlretrieve(downloadUrl, zipName)
+            with zipfile.ZipFile(zipName, "r") as zip_ref:
+                zip_ref.extractall(installDir)
+
+            # Elevate the aftman installer
+            subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+
+            # Cleanup extracted files and downloaded zip
+            os.remove(zipName)
             shutil.rmtree(installDir)
+        elif sys.platform == "darwin": #MacOS
+            zipName = f"aftman-{aftmanVersion}-macos-x86_64.zip"
+            downloadUrl = f"https://github.com/LPGhatguy/aftman/releases/latest/download/{zipName}"
+            installDir = os.path.join(Path.home(), "aftman")
+            # Check if aftman is already installed
+            if os.path.exists(os.path.join(installDir, "aftman")):
+                shutil.rmtree(installDir)
 
-        urllib.request.urlretrieve(downloadUrl, zipName)
-        with zipfile.ZipFile(zipName, "r") as zip_ref:
-            zip_ref.extractall(installDir)
+            urllib.request.urlretrieve(downloadUrl, zipName)
+            with zipfile.ZipFile(zipName, "r") as zip_ref:
+                zip_ref.extractall(installDir)
 
-        # Elevate the aftman installer
-        subprocess.call([os.path.join(installDir, "aftman.exe"), "self-install"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        #update list
+            # Make the extracted aftman file executable
+            aftmanPath = os.path.join(installDir, "aftman")
+            subprocess.call(["chmod", "+x", aftmanPath])
 
-        cleanup = os.path.join(os.getcwd(), zipName)
-        if os.path.exists(cleanup):
-            os.remove(cleanup)
-        
+            # Run the aftman installer
+            subprocess.call([aftmanPath, "self-install"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            # Cleanup extracted files and downloaded zip
+            os.remove(zipName)
+            shutil.rmtree(installDir)
+        else:
+            print("Aftman installation is currently only supported on Windows and macOS.")
+
+        # Update installations list
         self.update_installations_list()
+
 
     def is_installed(self, installToFind):
         try:
             if installToFind == "rojo/plugin":
-                directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")  # Use the appropriate path for the local directory
-                if self.check_file_exists(directory, "Rojo.rbxm"):
-                    return True
+                if sys.platform == "win32":
+                    directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")
+                elif sys.platform == "darwin":
+                    directory = os.path.expanduser("~/Library/Application Support/Roblox/Plugins")
+                elif sys.platform == "linux":
+                    directory = os.path.expanduser("~/.config/Roblox/Plugins")
                 else:
+                    print("Unsupported operating system.")
                     return False
+
+                return self.check_file_exists(directory, "Rojo.rbxm")
+            
             elif installToFind == "rojo/converter":
                 user_home = str(Path.home())
                 directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
-                if self.check_file_exists(directory, "rbxlx-to-rojo.exe"):
-                    return True
-                else:
-                    return False
+                
+                return self.check_file_exists(directory, "rbxlx-to-rojo.exe")
+            
             else:
-                user_home = str(Path.home())
-                directory = os.path.join(os.path.join(user_home, ".aftman"), "bin")
+                if sys.platform == "win32":
+                    directory = os.path.expanduser(os.path.join("~", ".aftman", "bin"))
+                elif sys.platform == "darwin":
+                    directory = os.path.expanduser(os.path.join("~", ".aftman", "bin"))
+                elif sys.platform == "linux":
+                    directory = os.path.expanduser(os.path.join("~", ".aftman", "bin"))
+                else:
+                    print("Unsupported operating system.")
+                    return False
+
                 if os.path.exists(directory):
                     out = ""
-                    if installToFind == "aftman" :
-                        result = subprocess.run(["aftman", "-V"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
-                        out = str(result.stdout)
+                    if installToFind == "aftman":
+                        result = subprocess.run(["aftman", "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                        out = result.stdout
                     else:
-                        result = subprocess.run(["aftman", "list"], creationflags=subprocess.CREATE_NO_WINDOW, capture_output=True, text=True)
-                        out = str(result.stdout)
+                        result = subprocess.run(["aftman", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                        out = result.stdout
 
-                    if ((out).find(installToFind)!=-1):
+                    if out.find(installToFind) != -1:
                         return True
                     else:
                         return False
                 else:
                     return False
 
-
         except subprocess.CalledProcessError:
             return False
         except FileNotFoundError:
-            # Handle the case when 'aftman' executable is not found
             print("Error: 'aftman' not found")
         except Exception as e:
-            # Handle any other unexpected exceptions
             print("Unexpected error:", e)
 
     def install_tool(self, item, thread, previous_thread):
-        if previous_thread != False:
-            while (previous_thread != None and previous_thread.is_alive()):
+        if previous_thread is not False:
+            while previous_thread is not None and previous_thread.is_alive():
                 time.sleep(0.5)
-        
+
         self.installing = True
-        self.app.loading_start("Installing " + item["name"] + " . . . ")
- 
+        self.app.loading_start("Installing " + item["name"] + " . . .")
+
         versionName = item["version"]
         # Logic to perform the installation
         # Replace this with your implementation
@@ -190,38 +255,64 @@ class InstallManager(customtkinter.CTkFrame):
         elif versionName == "aftman":
             self.install_aftman()
         else:
-            subprocess.run(["aftman", "trust", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
-            subprocess.run(["aftman", "add", "--global", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
-            subprocess.run(["aftman", "install"], creationflags=subprocess.CREATE_NO_WINDOW)
+            if sys.platform == "win32":
+                subprocess.run(["aftman", "trust", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
+                subprocess.run(["aftman", "add", "--global", versionName], creationflags=subprocess.CREATE_NO_WINDOW)
+                subprocess.run(["aftman", "install"], creationflags=subprocess.CREATE_NO_WINDOW)
+            elif sys.platform == "darwin":
+                subprocess.run(["aftman", "trust", versionName])
+                subprocess.run(["aftman", "add", "--global", versionName])
+                subprocess.run(["aftman", "install"])
+            elif sys.platform.startswith("linux"):
+                subprocess.run(["aftman", "trust", versionName])
+                subprocess.run(["aftman", "add", "--global", versionName])
+                subprocess.run(["aftman", "install"])
+            else:
+                print("Unsupported operating system.")
 
         self.update_installations_list()
         self.app.loading_end(self)
         self.installing = False
 
-        if item["restart"] == True:
-            self.app.loading_start("App must restart . . . ")
+        if item["restart"]:
+            self.app.loading_start("App must restart . . .")
             self.app.restart_app()
-            
-
 
     def uninstall_tool(self, item):
         v = item["version"]
         # Logic to perform the uninstallation
         # Replace this with your implementation
-        if v=="rojo/plugin":
-            directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")  # Use the appropriate path for the local directory
+        if v == "rojo/plugin":
+            if sys.platform == "win32":
+                directory = os.path.expanduser("~/AppData/Local/Roblox/Plugins")
+            elif sys.platform == "darwin":
+                directory = os.path.expanduser("~/Library/Application Support/Roblox/Plugins")
+            elif sys.platform.startswith("linux"):
+                directory = os.path.expanduser("~/.config/Roblox/Plugins")
+            else:
+                print("Unsupported operating system.")
+                return
+
             self.delete_file_if_exists(directory, "Rojo.rbxm")
             self.delete_file_if_exists(directory, "RojoManagedPlugin.rbxm")
-        elif v=="rojo/converter":
+        elif v == "rojo/converter":
             user_home = str(Path.home())
             directory = os.path.join(os.path.join(user_home, "RODAssistant"), "Utility")
             self.delete_file_if_exists(directory, "rbxlx-to-rojo.exe")
-        elif v=="aftman":
-            user_home = str(Path.home())
-            directory = os.path.join(user_home, ".aftman")
-            if os.path.exists(directory):
-                shutil.rmtree(directory)
-                
+        elif v == "aftman":
+            if sys.platform == "win32":
+                user_home = str(Path.home())
+                directory = os.path.join(user_home, ".aftman")
+                if os.path.exists(directory):
+                    shutil.rmtree(directory)
+            elif sys.platform == "darwin":
+                subprocess.run(["aftman", "uninstall"])
+            elif sys.platform.startswith("linux"):
+                subprocess.run(["aftman", "uninstall"])
+            else:
+                print("Unsupported operating system.")
+                return
+
         self.deselect_all_tools()
 
     def install_tools(self):
