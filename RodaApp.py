@@ -141,53 +141,64 @@ class App(CTk):
         self.manage_installs()
 
     def kill_rojo_processes(self):
-        # Find the process IDs of rojo.exe using tasklist command on Windows
-
-        
-        result = subprocess.run(['tasklist', '/fi', 'imagename eq rojo.exe'], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        output = result.stdout
-
-        # Parse the output to extract the process IDs
         process_ids = []
-        for line in output.splitlines()[3:]:
-            if line.strip() != '':
-                process_id = int(line.split()[1])
-                process_ids.append(process_id)
+        for process in psutil.process_iter(['pid', 'name', 'cmdline']):
+            if process.info.get('cmdline') and 'rojo' in process.info['cmdline']:
+                process_ids.append(process.info['pid'])
 
-        # Terminate the rojo.exe processes
+        # Terminate the rojo processes
         for process_id in process_ids:
-            subprocess.run(['taskkill', '/f', '/pid', str(process_id)], creationflags=subprocess.CREATE_NO_WINDOW)
+            process = psutil.Process(process_id)
+            print("Terminating Rojo server with PID: " + str(process_id))
+            process.terminate()
+
 
     def kill_all_executables(self):
-        current_pid = os.getpid()
-        current_exe = os.path.abspath(__file__)
+        process_id = os.getpid()
 
-        # Iterate over all running processes
-        for process in psutil.process_iter(['pid', 'name', 'exe']):
-            pid = process.info['pid']
-            exe = process.info['exe']
+        process = psutil.Process(process_id)
+        print("Terminating RODA App with PID: " + str(process_id))
+        process.terminate()
 
-            # Check if the process is an executable of the current file
-            if exe == current_exe and pid != current_pid:
-                # Terminate the process
-                try:
-                    process.kill()
-                    print(f"Process with PID {pid} has been terminated.")
-                except psutil.NoSuchProcess:
-                    print(f"Process with PID {pid} no longer exists.")
+
+
 
     def import_rbxlx(self):
         user_home = str(Path.home())
-        file = os.path.join(os.path.join(os.path.join(user_home, "RODAssistant"), "Utility"), "rbxlx-to-rojo.exe")
-        if os.path.exists(file):
-            subprocess.Popen(file, shell=False, creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        if sys.platform == "win32":
+            file = os.path.join(os.path.join(os.path.join(user_home, "RODAssistant"), "Utility"), "rbxlx-to-rojo.exe")
+            if os.path.exists(file):
+                subprocess.Popen(file, shell=False, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        else:
+            file = os.path.join(os.path.join(os.path.join(user_home, "RODAssistant"), "Utility"), "rbxlx-to-rojo")
+            if os.path.exists(file):
+                subprocess.Popen(["open", file])
 
     def kill_current_file_processes(self):
         current_file = os.path.basename(__file__)
-        try:
-            subprocess.run(['taskkill', '/F', '/FI', f'IMAGENAME eq RodaApp'], creationflags=subprocess.CREATE_NO_WINDOW)
-        except subprocess.CalledProcessError:
-            print(f"Failed to terminate processes matching '{current_file}'.")
+
+        if sys.platform == "win32":
+            try:
+                subprocess.run(['taskkill', '/F', '/IM', current_file], creationflags=subprocess.CREATE_NO_WINDOW)
+            except subprocess.CalledProcessError:
+                print(f"Failed to terminate processes matching '{current_file}'.")
+        else:
+            # Find the process IDs of the current file on macOS or Linux
+            current_pid = os.getpid()
+            for process in psutil.process_iter(['pid', 'name']):
+                pid = process.info['pid']
+                name = process.info['name']
+                
+                # Check if the process matches the current file
+                if name == current_file and pid != current_pid:
+                    # Terminate the process
+                    try:
+                        process.kill()
+                        print(f"Process with PID {pid} has been terminated.")
+                    except psutil.NoSuchProcess:
+                        print(f"Process with PID {pid} no longer exists.")
+
 
 
     def on_closing(self):
@@ -200,12 +211,19 @@ class App(CTk):
     def restart_app(self):
         self.kill_rojo_processes()
         self.projects_frame.stop_thread()
+        
+        if sys.platform == "win32":
+            # Launch a new instance of the application on Windows
+            subprocess.Popen([sys.executable] + sys.argv)
+        else:
+            # Launch a new instance of the application on macOS
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+            
         self.kill_all_executables()
-        # Launch a new instance of the EXE
-        subprocess.Popen([sys.executable] + sys.argv)
         self.destroy()
         # Terminate the current instance
         sys.exit()
+
     
     def hide_cmd(self):
         return
@@ -259,13 +277,23 @@ class App(CTk):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-if __name__ == "__main__":
-    # Check if the script is already running with administrative privileges
-    if not ctypes.windll.shell32.IsUserAnAdmin():
-        # Re-launch the script with administrative privileges
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+def relaunch_with_admin_privileges():
+    if sys.platform == "win32":
+        # Check if the script is already running with administrative privileges on Windows
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            # Re-launch the script with administrative privileges
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        else:
+            # Run the script without administrative privileges on Windows
+            run_script()
     else:
-        app = App()
-        
-        app.mainloop()
-        del app
+        # Run the script without administrative privileges on other platforms
+        run_script()
+
+def run_script():
+    app = App()
+    app.mainloop()
+    del app
+
+if __name__ == "__main__":
+    relaunch_with_admin_privileges()
