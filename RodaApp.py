@@ -99,7 +99,7 @@ class App(CTk):
         #SidebarWidgets
 
         sbx=0.9
-        sby=0.05
+        sby=0.075
         px=0.05
         py=0.025
 
@@ -122,12 +122,12 @@ class App(CTk):
         self.appearance_mode_label.place(relwidth=sbx, relheight=sby, rely=0.6, relx=px)
         self.appearance_mode_optionemenu = CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.place(relwidth=sbx, relheight=sby, rely=0.7, relx=px)
+        self.appearance_mode_optionemenu.place(relwidth=sbx, relheight=.05, rely=0.7, relx=px)
         self.scaling_label = CTkLabel(self.sidebar_frame, text="UI Scaling:", anchor="w")
         self.scaling_label.place(relwidth=sbx, relheight=sby, rely=0.8, relx=px)
         self.scaling_optionemenu = CTkOptionMenu(self.sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"],
                                                                command=self.change_scaling_event)
-        self.scaling_optionemenu.place(relwidth=sbx, relheight=sby, rely=0.9, relx=px)
+        self.scaling_optionemenu.place(relwidth=sbx, relheight=.05, rely=0.9, relx=px)
 
         # set default values
         self.appearance_mode_optionemenu.set("Dark")
