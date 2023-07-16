@@ -25,8 +25,8 @@ class InstallManager(customtkinter.CTkFrame):
                 # List of recommended installs
         self.installations_list = [
             {"name": "Aftman Toolchain Manager", "versionName": "aftman", "dependency": "", "var": customtkinter.BooleanVar(), "restart": True},
-            {"name": "Rojo CLI", "versionName": "rojo-rbx/rojo", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": False},
-            {"name": "Wally CLI", "versionName": "UpliftGames/wally", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": False},
+            {"name": "Rojo CLI", "versionName": "rojo-rbx/rojo", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": True},
+            {"name": "Wally CLI", "versionName": "UpliftGames/wally", "dependency": "aftman", "var": customtkinter.BooleanVar(), "restart": True},
             {"name": "Rojo Plugin", "versionName": "rojo/plugin", "dependency": "rojo-rbx/rojo", "var": customtkinter.BooleanVar(), "restart": False},
             {"name": "RBXLX to Rojo", "versionName": "rojo/converter", "dependency": "", "var": customtkinter.BooleanVar(), "restart": False},
         ]
@@ -200,7 +200,7 @@ class InstallManager(customtkinter.CTkFrame):
 
         if item["restart"] == True:
             self.app.loading_start("App must restart . . . ")
-            self.app.on_closing()
+            self.app.restart_app()
             
 
 

@@ -197,6 +197,15 @@ class App(CTk):
         self.kill_current_file_processes()
         self.destroy()
 
+    def restart_app(self):
+        self.kill_rojo_processes()
+        self.projects_frame.stop_thread()
+        self.kill_all_executables()
+        # Launch a new instance of the EXE
+        subprocess.Popen([sys.executable] + sys.argv)
+        self.destroy()
+        # Terminate the current instance
+        sys.exit()
     
     def hide_cmd(self):
         return
