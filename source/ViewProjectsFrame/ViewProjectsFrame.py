@@ -1,15 +1,14 @@
 import subprocess
+import sys
 import os
 import customtkinter as ct
 from PIL import Image
 import lxml.html
 import urllib.request
-import subprocess
 import threading
 import time
 import tkinter.simpledialog as tkSimpleDialog
 import tkinter.messagebox as messagebox
-import wget
 from pathlib import Path
 
 class ViewProjectsFrame(ct.CTkFrame):
@@ -98,9 +97,9 @@ class ViewProjectsFrame(ct.CTkFrame):
 
 
     def download_file(self, url, directory):
-        # Download the file using wget
         try:
-            wget.download(url, out=directory)
+            # Download the file using urllib
+            urllib.request.urlretrieve(url, directory)
         except Exception as e:
             return
 
@@ -179,7 +178,12 @@ class ViewProjectsFrame(ct.CTkFrame):
 
 
     def run_server(self):
-        subprocess.run("rojo serve", cwd=self.current_project["file_path"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        if sys.platform == "win32":
+            # Windows platform
+            subprocess.run("rojo serve", cwd=self.current_project["file_path"], shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        else:
+            # Non-Windows platform
+            subprocess.run("rojo serve", cwd=self.current_project["file_path"], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def launch_rojo(self):
         self.app.kill_rojo_processes()
@@ -258,7 +262,6 @@ class ViewProjectsFrame(ct.CTkFrame):
         # Clear the project details
         self.clear_project_details()
         self.app.hide_cmd()
-        self.app.kill_rojo_processes()
 
     def delete_project(self):
         user_confirmation = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete?")
